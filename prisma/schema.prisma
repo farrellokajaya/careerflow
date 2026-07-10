@@ -1,0 +1,400 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ApplicationStatus {
+  WISHLIST
+  APPLIED
+  SCREENING
+  INTERVIEW
+  TECHNICAL_TEST
+  OFFER
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  FREELANCE
+}
+
+enum WorkType {
+  ONSITE
+  HYBRID
+  REMOTE
+}
+
+enum ApplicationPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum InterviewType {
+  HR
+  USER
+  TECHNICAL
+  CASE_STUDY
+  CULTURE_FIT
+  FINAL
+  OTHER
+}
+
+enum InterviewResult {
+  PENDING
+  PASSED
+  FAILED
+  CANCELLED
+}
+
+enum DocumentType {
+  CV
+  COVER_LETTER
+  PORTFOLIO
+  CERTIFICATE
+  TRANSCRIPT
+  OTHER
+}
+
+enum CompanySize {
+  STARTUP
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}
+
+enum ReminderType {
+  APPLICATION_DEADLINE
+  INTERVIEW
+  FOLLOW_UP
+  CUSTOM
+}
+
+enum NotificationType {
+  APPLICATION
+  INTERVIEW
+  REMINDER
+  SYSTEM
+}
+
+model User {
+  id                  String                     @id @default(cuid())
+  name                String?
+  email               String                     @unique
+  emailVerified       DateTime?
+  password            String?
+  image               String?
+  role                Role                       @default(USER)
+  isActive            Boolean                    @default(true)
+  timezone            String                     @default("Asia/Jakarta")
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+  accounts            Account[]
+  sessions            Session[]
+  passwordResetTokens PasswordResetToken[]
+  companies           Company[]
+  jobApplications     JobApplication[]
+  statusChanges       ApplicationStatusHistory[] @relation("StatusChangedBy")
+  notes               Note[]
+  documents           Document[]
+  reminders           Reminder[]
+  tags                Tag[]
+  activityLogs        ActivityLog[]              @relation("ActivityLogUser")
+  notifications       Notification[]
+
+  @@index([role])
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expires])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@index([expires])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Company {
+  id              String           @id @default(cuid())
+  userId          String
+  name            String
+  website         String?
+  industry        String?
+  size            CompanySize?
+  location        String?
+  description     String?
+  logoUrl         String?
+  linkedinUrl     String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?
+  user            User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  jobApplications JobApplication[]
+
+  @@unique([userId, name])
+  @@index([userId, deletedAt])
+  @@index([name])
+  @@index([deletedAt])
+}
+
+model JobApplication {
+  id              String                     @id @default(cuid())
+  userId          String
+  companyId       String
+  position        String
+  jobUrl          String?
+  employmentType  EmploymentType
+  workType        WorkType
+  location        String?
+  salaryMin       Decimal?                   @db.Decimal(15, 2)
+  salaryMax       Decimal?                   @db.Decimal(15, 2)
+  salaryCurrency  String                     @default("IDR")
+  status          ApplicationStatus          @default(WISHLIST)
+  priority        ApplicationPriority        @default(MEDIUM)
+  source          String?
+  appliedAt       DateTime?
+  deadlineAt      DateTime?
+  description     String?
+  requirements    String?
+  contactName     String?
+  contactEmail    String?
+  contactPhone    String?
+  createdAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @updatedAt
+  archivedAt      DateTime?
+  user            User                       @relation(fields: [userId], references: [id], onDelete: Restrict)
+  company         Company                    @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  statusHistory   ApplicationStatusHistory[]
+  interviews      Interview[]
+  notes           Note[]
+  documents       Document[]
+  reminders       Reminder[]
+  applicationTags ApplicationTag[]
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([status])
+  @@index([priority])
+  @@index([appliedAt])
+  @@index([deadlineAt])
+  @@index([archivedAt])
+  @@index([userId, status, archivedAt])
+  @@index([userId, priority])
+}
+
+model ApplicationStatusHistory {
+  id             String             @id @default(cuid())
+  applicationId  String
+  previousStatus ApplicationStatus?
+  newStatus      ApplicationStatus
+  note           String?
+  changedById    String?
+  createdAt      DateTime           @default(now())
+  application    JobApplication     @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  changedBy      User?              @relation("StatusChangedBy", fields: [changedById], references: [id], onDelete: SetNull)
+
+  @@index([applicationId, createdAt])
+  @@index([changedById])
+  @@index([createdAt])
+}
+
+model Interview {
+  id               String          @id @default(cuid())
+  applicationId    String
+  title            String
+  interviewType    InterviewType
+  scheduledAt      DateTime
+  durationMinutes  Int?
+  location         String?
+  meetingUrl       String?
+  interviewerName  String?
+  interviewerEmail String?
+  notes            String?
+  result           InterviewResult @default(PENDING)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  application      JobApplication  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  reminders        Reminder[]
+
+  @@index([applicationId])
+  @@index([scheduledAt])
+  @@index([result])
+}
+
+model Note {
+  id            String         @id @default(cuid())
+  userId        String
+  applicationId String
+  title         String
+  content       String
+  isPinned      Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  user          User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  application   JobApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+  @@index([applicationId, updatedAt])
+  @@index([userId, isPinned, updatedAt])
+}
+
+model Document {
+  id            String          @id @default(cuid())
+  userId        String
+  applicationId String?
+  name          String
+  type          DocumentType
+  fileUrl       String
+  fileSize      Int
+  mimeType      String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  user          User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  application   JobApplication? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+
+  @@index([userId, type])
+  @@index([applicationId])
+  @@index([type])
+}
+
+model Reminder {
+  id            String          @id @default(cuid())
+  userId        String
+  applicationId String?
+  interviewId   String?
+  type          ReminderType    @default(CUSTOM)
+  title         String
+  description   String?
+  remindAt      DateTime
+  isCompleted   Boolean         @default(false)
+  sentAt        DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  user          User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  application   JobApplication? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  interview     Interview?      @relation(fields: [interviewId], references: [id], onDelete: SetNull)
+
+  @@index([userId, remindAt])
+  @@index([applicationId])
+  @@index([interviewId])
+  @@index([remindAt])
+  @@index([isCompleted, sentAt, remindAt])
+}
+
+model Tag {
+  id              String           @id @default(cuid())
+  userId          String
+  name            String
+  color           String
+  createdAt       DateTime         @default(now())
+  user            User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  applicationTags ApplicationTag[]
+
+  @@unique([userId, name])
+}
+
+model ApplicationTag {
+  applicationId String
+  tagId         String
+  createdAt     DateTime       @default(now())
+  application   JobApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  tag           Tag            @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([applicationId, tagId])
+  @@index([tagId])
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  user       User?    @relation("ActivityLogUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  link      String?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([type])
+  @@index([createdAt])
+  @@index([userId, isRead, createdAt])
+}
