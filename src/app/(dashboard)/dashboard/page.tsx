@@ -1,90 +1,73 @@
-import type { Metadata } from "next";
-import { BriefcaseBusiness, Mail, ShieldCheck, UserRound } from "lucide-react";
+import { BriefcaseBusiness, Building2, LayoutDashboard } from "lucide-react";
 
-import { LogoutButton } from "@/components/auth/logout-button";
-import { AppLogo } from "@/components/shared/app-logo";
-import { requireAuthenticatedUser } from "@/lib/auth/guards";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const metadata: Metadata = {
-  title: "Dashboard",
-  description: "Dashboard sementara CareerFlow.",
-};
-
-export default async function DashboardPage() {
-  const user = await requireAuthenticatedUser();
-
+export default function DashboardPage() {
   return (
-    <main className="min-h-svh bg-muted/30">
-      <header className="border-b bg-background">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <AppLogo />
+    <main className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full max-w-6xl space-y-6">
+        <section className="space-y-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <LayoutDashboard className="size-5" aria-hidden="true" />
+            </div>
 
-          <LogoutButton />
-        </div>
-      </header>
-
-      <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
-        <section className="mb-8">
-          <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <BriefcaseBusiness className="size-6" aria-hidden="true" />
+            <Badge variant="secondary">Dashboard</Badge>
           </div>
 
-          <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Selamat datang di CareerFlow
+            </h1>
 
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Authentication berhasil. Dashboard utama, statistik, dan fitur pengelolaan lamaran akan
-            dibuat pada tahap berikutnya.
-          </p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+              Gunakan workspace ini untuk mengelola perusahaan dan aktivitas pencarian kerja Anda
+              secara terorganisir.
+            </p>
+          </div>
         </section>
 
-        <section
-          className="rounded-2xl border bg-card p-6 text-card-foreground shadow-sm"
-          aria-labelledby="account-information-title"
-        >
-          <div className="mb-6 flex items-start justify-between gap-4">
-            <div>
-              <h2 id="account-information-title" className="text-lg font-semibold">
-                Informasi akun
-              </h2>
+        <section className="grid gap-4 md:grid-cols-2" aria-label="Informasi dashboard">
+          <Card>
+            <CardHeader>
+              <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
+                <Building2 className="size-5 text-muted-foreground" aria-hidden="true" />
+              </div>
 
-              <p className="mt-1 text-sm text-muted-foreground">
-                Data aman dari user yang sedang terautentikasi.
+              <CardTitle>Company Management</CardTitle>
+
+              <CardDescription>
+                Kelola daftar perusahaan yang berkaitan dengan proses pencarian kerja Anda.
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Fitur pengelolaan company akan tersedia setelah tahap dashboard foundation selesai.
               </p>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="rounded-full border bg-muted px-3 py-1 text-xs font-semibold">
-              {user.role}
-            </div>
-          </div>
+          <Card>
+            <CardHeader>
+              <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
+                <BriefcaseBusiness className="size-5 text-muted-foreground" aria-hidden="true" />
+              </div>
 
-          <dl className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border bg-background p-4">
-              <dt className="flex items-center gap-2 text-sm text-muted-foreground">
-                <UserRound className="size-4" aria-hidden="true" />
-                Nama
-              </dt>
+              <CardTitle>Job Applications</CardTitle>
 
-              <dd className="mt-2 font-medium">{user.name}</dd>
-            </div>
+              <CardDescription>
+                Pantau lamaran kerja dan perkembangan proses rekrutmen Anda.
+              </CardDescription>
+            </CardHeader>
 
-            <div className="rounded-xl border bg-background p-4">
-              <dt className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Mail className="size-4" aria-hidden="true" />
-                Email
-              </dt>
-
-              <dd className="mt-2 font-medium break-all">{user.email}</dd>
-            </div>
-
-            <div className="rounded-xl border bg-background p-4 sm:col-span-2">
-              <dt className="flex items-center gap-2 text-sm text-muted-foreground">
-                <ShieldCheck className="size-4" aria-hidden="true" />
-                Role
-              </dt>
-
-              <dd className="mt-2 font-medium">{user.role}</dd>
-            </div>
-          </dl>
+            <CardContent>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Pengelolaan job application belum dikerjakan pada Tahap 4.
+              </p>
+            </CardContent>
+          </Card>
         </section>
       </div>
     </main>

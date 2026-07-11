@@ -1,100 +1,67 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowLeft, Mail, ShieldCheck, UserRound, Wrench } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
-import { LogoutButton } from "@/components/auth/logout-button";
-import { AppLogo } from "@/components/shared/app-logo";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAdminUser } from "@/lib/auth/guards";
 
-export const metadata: Metadata = {
-  title: "Admin Area",
-  description: "Halaman admin sementara CareerFlow.",
-};
-
 export default async function AdminPage() {
-  const admin = await requireAdminUser();
+  const user = await requireAdminUser();
+  const displayName = user.name?.trim() || "Administrator CareerFlow";
 
   return (
-    <main className="min-h-svh bg-muted/30">
-      <header className="border-b bg-background">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <AppLogo />
+    <main className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full max-w-6xl space-y-6">
+        <section className="space-y-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <ShieldCheck className="size-5" aria-hidden="true" />
+            </div>
 
-          <LogoutButton />
-        </div>
-      </header>
-
-      <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
-        <Button asChild variant="ghost" className="mb-6">
-          <Link href="/dashboard">
-            <ArrowLeft aria-hidden="true" />
-            Kembali ke dashboard
-          </Link>
-        </Button>
-
-        <section className="mb-8">
-          <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <ShieldCheck className="size-6" aria-hidden="true" />
+            <Badge variant="secondary">ADMIN</Badge>
           </div>
 
-          <h1 className="text-3xl font-semibold tracking-tight">Admin Area</h1>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Admin Workspace</h1>
 
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Authorization role ADMIN berhasil. Dashboard admin dan fitur pengelolaan sistem akan
-            dibuat pada tahap berikutnya.
-          </p>
-        </section>
-
-        <section
-          className="rounded-2xl border bg-card p-6 text-card-foreground shadow-sm"
-          aria-labelledby="admin-information-title"
-        >
-          <div className="mb-6 flex items-start justify-between gap-4">
-            <div>
-              <h2 id="admin-information-title" className="text-lg font-semibold">
-                Informasi administrator
-              </h2>
-
-              <p className="mt-1 text-sm text-muted-foreground">
-                Data administrator yang telah diverifikasi pada server.
-              </p>
-            </div>
-
-            <div className="rounded-full border bg-muted px-3 py-1 text-xs font-semibold">
-              {admin.role}
-            </div>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+              Halaman ini hanya dapat diakses oleh administrator CareerFlow.
+            </p>
           </div>
-
-          <dl className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border bg-background p-4">
-              <dt className="flex items-center gap-2 text-sm text-muted-foreground">
-                <UserRound className="size-4" aria-hidden="true" />
-                Nama
-              </dt>
-
-              <dd className="mt-2 font-medium">{admin.name}</dd>
-            </div>
-
-            <div className="rounded-xl border bg-background p-4">
-              <dt className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Mail className="size-4" aria-hidden="true" />
-                Email
-              </dt>
-
-              <dd className="mt-2 font-medium break-all">{admin.email}</dd>
-            </div>
-
-            <div className="rounded-xl border bg-background p-4 sm:col-span-2">
-              <dt className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Wrench className="size-4" aria-hidden="true" />
-                Hak akses
-              </dt>
-
-              <dd className="mt-2 font-medium">{admin.role}</dd>
-            </div>
-          </dl>
         </section>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Akses administrator aktif</CardTitle>
+
+            <CardDescription>
+              Authorization halaman ini diperiksa kembali pada server.
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <dl className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-lg border bg-muted/30 p-4">
+                <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                  Nama
+                </dt>
+
+                <dd className="mt-2 text-sm font-medium break-words">{displayName}</dd>
+              </div>
+
+              <div className="rounded-lg border bg-muted/30 p-4">
+                <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                  Email
+                </dt>
+
+                <dd className="mt-2 text-sm font-medium break-all">{user.email}</dd>
+              </div>
+            </dl>
+
+            <p className="mt-4 text-sm leading-6 text-muted-foreground">
+              Pengelolaan user dan fitur administrasi lanjutan belum dikerjakan pada tahap ini.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </main>
   );
