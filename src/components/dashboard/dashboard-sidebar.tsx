@@ -24,12 +24,12 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
   );
 
   return (
-    <aside className="sticky top-0 hidden h-svh border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex lg:flex-col">
-      <div className="flex h-20 shrink-0 items-center border-b border-sidebar-border px-6">
+    <aside className="sticky top-0 flex h-svh flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground max-lg:hidden">
+      <div className="flex h-20 shrink-0 items-center border-b border-sidebar-border px-5 xl:px-6">
         <AppLogo className="text-sidebar-foreground" />
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col px-4 py-6">
+      <div className="flex min-h-0 flex-1 flex-col px-3 py-6 xl:px-4">
         <p className="px-3 text-xs font-medium tracking-wider text-muted-foreground uppercase">
           Workspace
         </p>
@@ -45,9 +45,9 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
                   aria-disabled="true"
                   className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground/70"
                 >
-                  <Icon className="size-4" aria-hidden="true" />
+                  <Icon className="size-4 shrink-0" aria-hidden="true" />
 
-                  <span className="flex-1">{item.label}</span>
+                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
 
                   <span className="rounded-full border border-sidebar-border px-2 py-0.5 text-[0.65rem] font-semibold tracking-wide uppercase">
                     Segera
@@ -70,16 +70,16 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
                     : "text-muted-foreground hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
                 )}
               >
-                <Icon className="size-4" aria-hidden="true" />
+                <Icon className="size-4 shrink-0" aria-hidden="true" />
 
-                <span>{item.label}</span>
+                <span className="truncate">{item.label}</span>
               </Link>
             );
           })}
         </nav>
       </div>
 
-      <div className="shrink-0 border-t border-sidebar-border px-6 py-4">
+      <div className="shrink-0 border-t border-sidebar-border px-5 py-4 xl:px-6">
         <p className="text-xs leading-5 text-muted-foreground">Job Application Tracker</p>
       </div>
     </aside>
