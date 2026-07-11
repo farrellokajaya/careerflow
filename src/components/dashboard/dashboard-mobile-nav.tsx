@@ -67,25 +67,6 @@ export function DashboardMobileNav({ role }: DashboardMobileNavProps) {
           <nav className="mt-3 space-y-1" aria-label="Mobile dashboard navigation">
             {visibleNavigation.map((item) => {
               const Icon = item.icon;
-
-              if (item.href === "/companies") {
-                return (
-                  <div
-                    key={item.href}
-                    aria-disabled="true"
-                    className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground/70"
-                  >
-                    <Icon className="size-4 shrink-0" aria-hidden="true" />
-
-                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
-
-                    <span className="rounded-full border px-2 py-0.5 text-[0.65rem] font-semibold tracking-wide uppercase">
-                      Segera
-                    </span>
-                  </div>
-                );
-              }
-
               const isActive = isDashboardNavigationItemActive(item, pathname);
 
               return (
