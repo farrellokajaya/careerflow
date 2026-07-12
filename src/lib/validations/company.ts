@@ -102,9 +102,16 @@ export const companyFormSchema = z.object({
   linkedinUrl: optionalLinkedInUrl,
 });
 
-export const companyIdSchema = z.cuid({
+const seedCompanyIdSchema = z.string().regex(/^seed_company_[a-z0-9_]+$/, {
   error: "Company tidak ditemukan atau tidak dapat diakses.",
 });
+
+export const companyIdSchema = z.union([
+  z.cuid({
+    error: "Company tidak ditemukan atau tidak dapat diakses.",
+  }),
+  seedCompanyIdSchema,
+]);
 
 export const companySearchSchema = z
   .string({ error: "Pencarian company tidak valid." })

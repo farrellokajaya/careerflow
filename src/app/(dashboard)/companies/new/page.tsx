@@ -1,6 +1,7 @@
 import { ArrowLeft, Building2 } from "lucide-react";
 import Link from "next/link";
 
+import { createCompanyAction } from "@/actions/company-actions";
 import { CompanyForm } from "@/components/companies/company-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,7 +47,7 @@ export default function NewCompanyPage() {
           </CardHeader>
 
           <CardContent>
-            <CompanyForm />
+            <CompanyForm action={createCompanyAction} mode="create" />
           </CardContent>
         </Card>
       </div>

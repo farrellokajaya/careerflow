@@ -1,7 +1,17 @@
 import type { CompanySize } from "@/generated/prisma/enums";
-import { Building2, CalendarClock, ExternalLink, Factory, MapPin, UsersRound } from "lucide-react";
+import {
+  Building2,
+  CalendarClock,
+  ExternalLink,
+  Factory,
+  MapPin,
+  Pencil,
+  UsersRound,
+} from "lucide-react";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CompanyListItem } from "@/lib/data/companies";
 
@@ -97,27 +107,39 @@ export function CompanyCard({ company }: CompanyCardProps) {
 
             <div className="min-w-0">
               <dt className="sr-only">Terakhir diperbarui</dt>
+
               <dd>Diperbarui {updatedAtFormatter.format(company.updatedAt)}</dd>
             </div>
           </div>
         </dl>
 
-        {company.website ? (
-          <a
-            href={company.website}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-auto inline-flex w-fit max-w-full items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
-          >
-            <span className="truncate">{getWebsiteLabel(company.website)}</span>
+        <div className="mt-auto space-y-4">
+          {company.website ? (
+            <a
+              href={company.website}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex w-fit max-w-full items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              <span className="truncate">{getWebsiteLabel(company.website)}</span>
 
-            <ExternalLink className="size-4 shrink-0" aria-hidden="true" />
+              <ExternalLink className="size-4 shrink-0" aria-hidden="true" />
 
-            <span className="sr-only">Buka website {company.name} di tab baru</span>
-          </a>
-        ) : (
-          <p className="mt-auto text-sm text-muted-foreground">Website belum tersedia.</p>
-        )}
+              <span className="sr-only">Buka website {company.name} di tab baru</span>
+            </a>
+          ) : (
+            <p className="text-sm text-muted-foreground">Website belum tersedia.</p>
+          )}
+
+          <div className="flex flex-wrap gap-2 border-t pt-4">
+            <Button asChild size="sm" variant="outline">
+              <Link href={`/companies/${company.id}/edit`}>
+                <Pencil aria-hidden="true" />
+                Edit
+              </Link>
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

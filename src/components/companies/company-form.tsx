@@ -1,10 +1,10 @@
 "use client";
 
+import type { CompanySize } from "@/generated/prisma/enums";
 import { LoaderCircle, Save } from "lucide-react";
 import Link from "next/link";
 import { useActionState } from "react";
 
-import { createCompanyAction } from "@/actions/company-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,17 +18,40 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import type { ActionResult } from "@/types/action-result";
 
+const EMPTY_COMPANY_SIZE_VALUE = "__NONE__";
+
 const initialState: ActionResult = {
   success: false,
   message: "",
+};
+
+type CompanyFormAction = (previousState: ActionResult, formData: FormData) => Promise<ActionResult>;
+
+type CompanyFormInitialValues = {
+  name: string;
+  website: string | null;
+  industry: string | null;
+  size: CompanySize | null;
+  location: string | null;
+  description: string | null;
+  logoUrl: string | null;
+  linkedinUrl: string | null;
+};
+
+type CompanyFormProps = {
+  action: CompanyFormAction;
+  mode: "create" | "edit";
+  initialValues?: CompanyFormInitialValues;
 };
 
 function getFieldError(errors: ActionResult["errors"], field: string): string | undefined {
   return errors?.[field]?.[0];
 }
 
-export function CompanyForm() {
-  const [state, formAction, isPending] = useActionState(createCompanyAction, initialState);
+export function CompanyForm({ action, mode, initialValues }: CompanyFormProps) {
+  const [state, formAction, isPending] = useActionState(action, initialState);
+
+  const isEditMode = mode === "edit";
 
   const nameError = getFieldError(state.errors, "name");
   const websiteError = getFieldError(state.errors, "website");
@@ -63,6 +86,7 @@ export function CompanyForm() {
             id="name"
             name="name"
             type="text"
+            defaultValue={initialValues?.name ?? ""}
             placeholder="Contoh: Tokopedia"
             autoComplete="organization"
             aria-required="true"
@@ -89,6 +113,7 @@ export function CompanyForm() {
             id="website"
             name="website"
             type="url"
+            defaultValue={initialValues?.website ?? ""}
             placeholder="https://example.com"
             autoComplete="url"
             aria-invalid={Boolean(websiteError)}
@@ -114,6 +139,7 @@ export function CompanyForm() {
             id="industry"
             name="industry"
             type="text"
+            defaultValue={initialValues?.industry ?? ""}
             placeholder="Contoh: Technology"
             autoComplete="off"
             aria-invalid={Boolean(industryError)}
@@ -135,7 +161,11 @@ export function CompanyForm() {
         <div className="space-y-2">
           <Label htmlFor="size">Ukuran perusahaan</Label>
 
-          <Select name="size" disabled={isPending}>
+          <Select
+            name="size"
+            defaultValue={initialValues?.size ?? EMPTY_COMPANY_SIZE_VALUE}
+            disabled={isPending}
+          >
             <SelectTrigger
               id="size"
               className="w-full"
@@ -146,6 +176,8 @@ export function CompanyForm() {
             </SelectTrigger>
 
             <SelectContent>
+              <SelectItem value={EMPTY_COMPANY_SIZE_VALUE}>Tidak ditentukan</SelectItem>
+
               <SelectItem value="STARTUP">Startup</SelectItem>
               <SelectItem value="SMALL">Small</SelectItem>
               <SelectItem value="MEDIUM">Medium</SelectItem>
@@ -160,7 +192,7 @@ export function CompanyForm() {
             </p>
           ) : (
             <p id="size-description" className="text-xs text-muted-foreground">
-              Opsional.
+              Opsional dan dapat dikosongkan kembali.
             </p>
           )}
         </div>
@@ -172,6 +204,7 @@ export function CompanyForm() {
             id="location"
             name="location"
             type="text"
+            defaultValue={initialValues?.location ?? ""}
             placeholder="Contoh: Jakarta, Indonesia"
             autoComplete="address-level2"
             aria-invalid={Boolean(locationError)}
@@ -196,6 +229,7 @@ export function CompanyForm() {
           <Textarea
             id="description"
             name="description"
+            defaultValue={initialValues?.description ?? ""}
             rows={5}
             placeholder="Tuliskan informasi singkat tentang perusahaan..."
             aria-invalid={Boolean(descriptionError)}
@@ -221,6 +255,7 @@ export function CompanyForm() {
             id="logoUrl"
             name="logoUrl"
             type="url"
+            defaultValue={initialValues?.logoUrl ?? ""}
             placeholder="https://example.com/logo.png"
             autoComplete="url"
             aria-invalid={Boolean(logoUrlError)}
@@ -246,6 +281,7 @@ export function CompanyForm() {
             id="linkedinUrl"
             name="linkedinUrl"
             type="url"
+            defaultValue={initialValues?.linkedinUrl ?? ""}
             placeholder="https://www.linkedin.com/company/example"
             autoComplete="url"
             aria-invalid={Boolean(linkedinUrlError)}
@@ -266,7 +302,7 @@ export function CompanyForm() {
       </div>
 
       <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-end">
-        <Button asChild type="button" variant="outline" className="sm:min-w-28">
+        <Button asChild variant="outline" className="sm:min-w-28">
           <Link href="/companies">Batal</Link>
         </Button>
 
@@ -279,7 +315,7 @@ export function CompanyForm() {
           ) : (
             <>
               <Save aria-hidden="true" />
-              Simpan company
+              {isEditMode ? "Perbarui company" : "Simpan company"}
             </>
           )}
         </Button>

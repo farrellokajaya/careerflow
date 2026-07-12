@@ -19,6 +19,18 @@ function getFirstSearchParam(value: string | string[] | undefined): string | und
   return Array.isArray(value) ? value[0] : value;
 }
 
+function getSuccessMessage(successCode: string | undefined): string | null {
+  if (successCode === "created") {
+    return "Company berhasil ditambahkan.";
+  }
+
+  if (successCode === "updated") {
+    return "Company berhasil diperbarui.";
+  }
+
+  return null;
+}
+
 export default async function CompaniesPage({ searchParams }: CompaniesPageProps) {
   const resolvedSearchParams = await searchParams;
 
@@ -26,17 +38,19 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
 
   const successCode = getFirstSearchParam(resolvedSearchParams.success);
 
+  const successMessage = getSuccessMessage(successCode);
+
   return (
     <main className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto w-full max-w-7xl space-y-6">
-        {successCode === "created" ? (
+        {successMessage ? (
           <div
             role="status"
             className="flex items-start gap-3 rounded-lg border border-emerald-600/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400"
           >
             <CircleCheckBig className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
 
-            <p>Company berhasil ditambahkan.</p>
+            <p>{successMessage}</p>
           </div>
         ) : null}
 
