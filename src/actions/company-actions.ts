@@ -23,6 +23,11 @@ const UPDATE_COMPANY_ERROR_MESSAGE = "Company gagal diperbarui. Silakan coba kem
 
 const ARCHIVE_COMPANY_ERROR_MESSAGE = "Company gagal diarsipkan. Silakan coba kembali.";
 
+const RESTORE_COMPANY_ERROR_MESSAGE = "Company gagal dipulihkan. Silakan coba kembali.";
+
+const RESTORE_NAME_CONFLICT_MESSAGE =
+  "Company tidak dapat dipulihkan karena nama tersebut sudah digunakan.";
+
 const COMPANY_NOT_FOUND_MESSAGE = "Company tidak ditemukan atau tidak dapat diakses.";
 
 function getFieldErrors(error: ZodError): Record<string, string[]> {
@@ -337,4 +342,115 @@ export async function archiveCompanyAction(
   revalidatePath("/companies");
   revalidatePath("/companies/archived");
   redirect("/companies?success=archived");
+}
+
+export async function restoreCompanyAction(
+  companyId: string,
+  previousState: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  void previousState;
+  void formData;
+
+  const user = await requireAuthenticatedUser();
+  const parsedCompanyId = companyIdSchema.safeParse(companyId);
+
+  if (!parsedCompanyId.success) {
+    return {
+      success: false,
+      message: COMPANY_NOT_FOUND_MESSAGE,
+    };
+  }
+
+  try {
+    const company = await prisma.company.findFirst({
+      where: {
+        id: parsedCompanyId.data,
+        userId: user.id,
+      },
+      select: {
+        id: true,
+        name: true,
+        deletedAt: true,
+      },
+    });
+
+    if (!company) {
+      return {
+        success: false,
+        message: COMPANY_NOT_FOUND_MESSAGE,
+      };
+    }
+
+    if (company.deletedAt) {
+      const conflictingCompany = await prisma.company.findFirst({
+        where: {
+          userId: user.id,
+          name: company.name,
+          deletedAt: null,
+          id: {
+            not: company.id,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (conflictingCompany) {
+        return {
+          success: false,
+          message: RESTORE_NAME_CONFLICT_MESSAGE,
+        };
+      }
+
+      const restoreResult = await prisma.company.updateMany({
+        where: {
+          id: company.id,
+          userId: user.id,
+          deletedAt: {
+            not: null,
+          },
+        },
+        data: {
+          deletedAt: null,
+        },
+      });
+
+      if (restoreResult.count !== 1) {
+        const currentCompany = await prisma.company.findFirst({
+          where: {
+            id: company.id,
+            userId: user.id,
+          },
+          select: {
+            deletedAt: true,
+          },
+        });
+
+        if (!currentCompany || currentCompany.deletedAt) {
+          return {
+            success: false,
+            message: RESTORE_COMPANY_ERROR_MESSAGE,
+          };
+        }
+      }
+    }
+  } catch (error: unknown) {
+    if (isUniqueConstraintError(error)) {
+      return {
+        success: false,
+        message: RESTORE_NAME_CONFLICT_MESSAGE,
+      };
+    }
+
+    return {
+      success: false,
+      message: RESTORE_COMPANY_ERROR_MESSAGE,
+    };
+  }
+
+  revalidatePath("/companies");
+  revalidatePath("/companies/archived");
+  redirect("/companies?success=restored");
 }

@@ -32,6 +32,10 @@ function getSuccessMessage(successCode: string | undefined): string | null {
     return "Company berhasil diarsipkan.";
   }
 
+  if (successCode === "restored") {
+    return "Company berhasil dipulihkan.";
+  }
+
   return null;
 }
 
@@ -93,15 +97,11 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
             </Link>
           </Button>
 
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled
-            title="Daftar arsip tersedia pada Step 14"
-          >
-            <Archive aria-hidden="true" />
-            Arsip
+          <Button asChild size="sm" variant="outline">
+            <Link href="/companies/archived">
+              <Archive aria-hidden="true" />
+              Arsip
+            </Link>
           </Button>
         </section>
 
