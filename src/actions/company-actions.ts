@@ -21,6 +21,8 @@ const CREATE_COMPANY_ERROR_MESSAGE = "Company gagal dibuat. Silakan coba kembali
 
 const UPDATE_COMPANY_ERROR_MESSAGE = "Company gagal diperbarui. Silakan coba kembali.";
 
+const ARCHIVE_COMPANY_ERROR_MESSAGE = "Company gagal diarsipkan. Silakan coba kembali.";
+
 const COMPANY_NOT_FOUND_MESSAGE = "Company tidak ditemukan atau tidak dapat diakses.";
 
 function getFieldErrors(error: ZodError): Record<string, string[]> {
@@ -255,4 +257,84 @@ export async function updateCompanyAction(
   revalidatePath("/companies");
   revalidatePath(`/companies/${company.id}/edit`);
   redirect("/companies?success=updated");
+}
+
+export async function archiveCompanyAction(
+  companyId: string,
+  previousState: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  void previousState;
+  void formData;
+
+  const user = await requireAuthenticatedUser();
+  const parsedCompanyId = companyIdSchema.safeParse(companyId);
+
+  if (!parsedCompanyId.success) {
+    return {
+      success: false,
+      message: COMPANY_NOT_FOUND_MESSAGE,
+    };
+  }
+
+  try {
+    const company = await prisma.company.findFirst({
+      where: {
+        id: parsedCompanyId.data,
+        userId: user.id,
+      },
+      select: {
+        id: true,
+        deletedAt: true,
+      },
+    });
+
+    if (!company) {
+      return {
+        success: false,
+        message: COMPANY_NOT_FOUND_MESSAGE,
+      };
+    }
+
+    if (!company.deletedAt) {
+      const archiveResult = await prisma.company.updateMany({
+        where: {
+          id: company.id,
+          userId: user.id,
+          deletedAt: null,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
+
+      if (archiveResult.count !== 1) {
+        const currentCompany = await prisma.company.findFirst({
+          where: {
+            id: company.id,
+            userId: user.id,
+          },
+          select: {
+            deletedAt: true,
+          },
+        });
+
+        if (!currentCompany?.deletedAt) {
+          return {
+            success: false,
+            message: ARCHIVE_COMPANY_ERROR_MESSAGE,
+          };
+        }
+      }
+    }
+  } catch {
+    return {
+      success: false,
+      message: ARCHIVE_COMPANY_ERROR_MESSAGE,
+    };
+  }
+
+  revalidatePath("/companies");
+  revalidatePath("/companies/archived");
+  redirect("/companies?success=archived");
 }

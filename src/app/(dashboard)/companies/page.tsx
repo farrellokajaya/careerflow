@@ -28,6 +28,10 @@ function getSuccessMessage(successCode: string | undefined): string | null {
     return "Company berhasil diperbarui.";
   }
 
+  if (successCode === "archived") {
+    return "Company berhasil diarsipkan.";
+  }
+
   return null;
 }
 

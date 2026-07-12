@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+import { archiveCompanyAction } from "@/actions/company-actions";
+import { ArchiveCompanyButton } from "@/components/companies/archive-company-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,6 +45,8 @@ function getWebsiteLabel(website: string): string {
 }
 
 export function CompanyCard({ company }: CompanyCardProps) {
+  const archiveAction = archiveCompanyAction.bind(null, company.id);
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -131,13 +135,15 @@ export function CompanyCard({ company }: CompanyCardProps) {
             <p className="text-sm text-muted-foreground">Website belum tersedia.</p>
           )}
 
-          <div className="flex flex-wrap gap-2 border-t pt-4">
+          <div className="flex flex-wrap items-start gap-2 border-t pt-4">
             <Button asChild size="sm" variant="outline">
               <Link href={`/companies/${company.id}/edit`}>
                 <Pencil aria-hidden="true" />
                 Edit
               </Link>
             </Button>
+
+            <ArchiveCompanyButton companyName={company.name} action={archiveAction} />
           </div>
         </div>
       </CardContent>
