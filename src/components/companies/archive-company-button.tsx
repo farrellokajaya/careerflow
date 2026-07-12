@@ -32,25 +32,14 @@ type ArchiveCompanyButtonProps = {
   action: ArchiveCompanyAction;
 };
 
-export function ArchiveCompanyButton({
-  companyName,
-  action,
-}: ArchiveCompanyButtonProps) {
-  const [state, formAction, isPending] = useActionState(
-    action,
-    initialState,
-  );
+export function ArchiveCompanyButton({ companyName, action }: ArchiveCompanyButtonProps) {
+  const [state, formAction, isPending] = useActionState(action, initialState);
 
   return (
     <div className="space-y-2">
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button
-            type="button"
-            size="sm"
-            variant="destructive"
-            disabled={isPending}
-          >
+          <Button type="button" size="sm" variant="destructive" disabled={isPending}>
             <Archive aria-hidden="true" />
             Archive
           </Button>
@@ -62,18 +51,12 @@ export function ArchiveCompanyButton({
               <TriangleAlert className="size-5" aria-hidden="true" />
             </div>
 
-            <AlertDialogTitle>
-              Archive company?
-            </AlertDialogTitle>
+            <AlertDialogTitle>Archive company?</AlertDialogTitle>
 
             <AlertDialogDescription>
-              Company{" "}
-              <span className="font-medium text-foreground">
-                {companyName}
-              </span>{" "}
-              akan dipindahkan dari daftar aktif ke daftar arsip.
-              Record dan Job Application yang terhubung tidak akan
-              dihapus.
+              Company <span className="font-medium text-foreground">{companyName}</span> akan
+              dipindahkan dari daftar aktif ke daftar arsip. Record dan Job Application yang
+              terhubung tidak akan dihapus.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -84,17 +67,10 @@ export function ArchiveCompanyButton({
               </AlertDialogCancel>
 
               <AlertDialogAction asChild>
-                <Button
-                  type="submit"
-                  variant="destructive"
-                  disabled={isPending}
-                >
+                <Button type="submit" variant="destructive" disabled={isPending}>
                   {isPending ? (
                     <>
-                      <LoaderCircle
-                        className="animate-spin"
-                        aria-hidden="true"
-                      />
+                      <LoaderCircle className="animate-spin" aria-hidden="true" />
                       Mengarsipkan...
                     </>
                   ) : (
