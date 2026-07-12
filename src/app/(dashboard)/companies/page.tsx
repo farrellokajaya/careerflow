@@ -1,4 +1,4 @@
-import { Archive, Building2, Plus } from "lucide-react";
+import { Archive, Building2, CircleCheckBig, Plus } from "lucide-react";
 import Link from "next/link";
 
 import { CompanyList } from "@/components/companies/company-list";
@@ -11,16 +11,35 @@ import { getActiveCompanies } from "@/lib/data/companies";
 type CompaniesPageProps = {
   searchParams: Promise<{
     query?: string | string[];
+    success?: string | string[];
   }>;
 };
 
+function getFirstSearchParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 export default async function CompaniesPage({ searchParams }: CompaniesPageProps) {
   const resolvedSearchParams = await searchParams;
+
   const result = await getActiveCompanies(resolvedSearchParams.query);
+
+  const successCode = getFirstSearchParam(resolvedSearchParams.success);
 
   return (
     <main className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto w-full max-w-7xl space-y-6">
+        {successCode === "created" ? (
+          <div
+            role="status"
+            className="flex items-start gap-3 rounded-lg border border-emerald-600/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400"
+          >
+            <CircleCheckBig className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+
+            <p>Company berhasil ditambahkan.</p>
+          </div>
+        ) : null}
+
         <section className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-3">
@@ -40,9 +59,11 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
             </div>
           </div>
 
-          <Button disabled title="Tersedia pada Step 11">
-            <Plus aria-hidden="true" />
-            Tambah company
+          <Button asChild>
+            <Link href="/companies/new">
+              <Plus aria-hidden="true" />
+              Tambah company
+            </Link>
           </Button>
         </section>
 
