@@ -1,11 +1,11 @@
 import type { LucideIcon } from "lucide-react";
-import { Building2, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { BriefcaseBusiness, Building2, LayoutDashboard, ShieldCheck } from "lucide-react";
 
 import type { Role } from "@/generated/prisma/enums";
 
 export type DashboardNavigationItem = {
   label: string;
-  href: "/dashboard" | "/companies" | "/admin";
+  href: "/dashboard" | "/applications" | "/companies" | "/admin";
   icon: LucideIcon;
   activeMatch: "exact" | "prefix";
   allowedRoles?: readonly Role[];
@@ -17,6 +17,12 @@ export const dashboardNavigation: readonly DashboardNavigationItem[] = [
     href: "/dashboard",
     icon: LayoutDashboard,
     activeMatch: "exact",
+  },
+  {
+    label: "Applications",
+    href: "/applications",
+    icon: BriefcaseBusiness,
+    activeMatch: "prefix",
   },
   {
     label: "Companies",
