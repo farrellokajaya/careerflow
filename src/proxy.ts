@@ -2,33 +2,36 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
 
-const GUEST_ONLY_ROUTES = ["/login", "/register"];
-const PROTECTED_ROUTES = ["/dashboard", "/admin"];
+const protectedRoutePrefixes = ["/dashboard", "/admin", "/companies"] as const;
 
-function matchesRoute(pathname: string, route: string): boolean {
-  return pathname === route || pathname.startsWith(`${route}/`);
+const guestOnlyRoutes = new Set(["/login", "/register"]);
+
+function matchesRoutePrefix(pathname: string, routePrefix: string): boolean {
+  return pathname === routePrefix || pathname.startsWith(`${routePrefix}/`);
 }
 
-export default auth((request) => {
+export const proxy = auth((request) => {
   const pathname = request.nextUrl.pathname;
 
-  const isAuthenticated = Boolean(request.auth?.user?.id) && request.auth?.user?.isActive === true;
+  const hasActiveSession = Boolean(request.auth?.user && request.auth.user.isActive);
 
-  const isGuestOnlyRoute = GUEST_ONLY_ROUTES.some((route) => matchesRoute(pathname, route));
+  const isProtectedRoute = protectedRoutePrefixes.some((routePrefix) =>
+    matchesRoutePrefix(pathname, routePrefix),
+  );
 
-  const isProtectedRoute = PROTECTED_ROUTES.some((route) => matchesRoute(pathname, route));
+  const isGuestOnlyRoute = guestOnlyRoutes.has(pathname);
 
-  if (isGuestOnlyRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL("/dashboard", request.nextUrl));
+  if (isProtectedRoute && !hasActiveSession) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (isProtectedRoute && !isAuthenticated) {
-    return NextResponse.redirect(new URL("/login", request.nextUrl));
+  if (isGuestOnlyRoute && hasActiveSession) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();
 });
 
 export const config = {
-  matcher: ["/login", "/register", "/dashboard/:path*", "/admin/:path*"],
+  matcher: ["/login", "/register", "/dashboard/:path*", "/admin/:path*", "/companies/:path*"],
 };
