@@ -287,6 +287,6 @@ Planned development includes:
 
 **Farrel Lokajaya**
 
-- [Portfolio](https://farrel-portofolio-liard.vercel.app/)
+- [Portofolio](https://farrel-portofolio-liard.vercel.app/)
 - [LinkedIn](https://www.linkedin.com/in/farrel-lokajaya-a25944203/)
 - [GitHub](https://github.com/farrellokajaya)
