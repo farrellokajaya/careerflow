@@ -11,6 +11,7 @@ import {
   CalendarClock,
   CalendarDays,
   ExternalLink,
+  Eye,
   MapPin,
   Pencil,
   Radio,
@@ -277,6 +278,13 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
           </p>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <Button asChild size="sm" variant="outline" className="w-full sm:w-fit">
+              <Link href={`/applications/${application.id}`}>
+                <Eye aria-hidden="true" />
+                Lihat detail
+              </Link>
+            </Button>
+
             {isArchived ? (
               <ApplicationArchiveAction
                 action={restoreAction}
