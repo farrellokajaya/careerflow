@@ -1,4 +1,4 @@
-import { Archive, BriefcaseBusiness, CircleCheckBig, Plus } from "lucide-react";
+import { Archive, ArrowLeft, CircleCheckBig } from "lucide-react";
 import Link from "next/link";
 
 import { ApplicationFilters } from "@/components/applications/application-filters";
@@ -7,11 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  getActiveJobApplications,
+  getArchivedJobApplications,
   getJobApplicationCompanyFilterOptions,
 } from "@/lib/data/job-applications";
 
-type ApplicationsPageProps = {
+type ArchivedApplicationsPageProps = {
   searchParams: Promise<{
     q?: string | string[];
     status?: string | string[];
@@ -25,37 +25,20 @@ function getFirstSearchParam(value: string | string[] | undefined): string | und
   return Array.isArray(value) ? value[0] : value;
 }
 
-function getSuccessMessage(successCode: string | undefined): string | null {
-  if (successCode === "created") {
-    return "Job Application berhasil ditambahkan.";
-  }
-
-  if (successCode === "updated") {
-    return "Job Application berhasil diperbarui.";
-  }
-
-  if (successCode === "status-updated") {
-    return "Status Job Application berhasil diperbarui.";
-  }
-
-  if (successCode === "archived") {
-    return "Job Application berhasil diarsipkan.";
-  }
-
-  return null;
-}
-
-export default async function ApplicationsPage({ searchParams }: ApplicationsPageProps) {
+export default async function ArchivedApplicationsPage({
+  searchParams,
+}: ArchivedApplicationsPageProps) {
   const resolvedSearchParams = await searchParams;
 
   const [result, companyOptions] = await Promise.all([
-    getActiveJobApplications(resolvedSearchParams),
-    getJobApplicationCompanyFilterOptions(),
+    getArchivedJobApplications(resolvedSearchParams),
+    getJobApplicationCompanyFilterOptions(true),
   ]);
 
   const successCode = getFirstSearchParam(resolvedSearchParams.success);
 
-  const successMessage = getSuccessMessage(successCode);
+  const successMessage =
+    successCode === "restored" ? "Job Application berhasil dipulihkan ke daftar aktif." : null;
 
   const hasActiveFilters = Boolean(
     result.filters.query ||
@@ -83,49 +66,39 @@ export default async function ApplicationsPage({ searchParams }: ApplicationsPag
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <BriefcaseBusiness className="size-5" aria-hidden="true" />
+                <Archive className="size-5" aria-hidden="true" />
               </div>
 
-              <Badge variant="secondary">Job Application Management</Badge>
+              <Badge variant="secondary">Job Application Archive</Badge>
             </div>
 
             <div>
               <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                Job Applications
+                Arsip Job Applications
               </h1>
 
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-                Pantau seluruh lamaran kerja aktif, status proses, deadline, dan company terkait
-                dalam satu tempat.
+                Lihat dan pulihkan lamaran yang sebelumnya dipindahkan dari daftar aktif.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Button asChild variant="outline">
-              <Link href="/applications/archived">
-                <Archive aria-hidden="true" />
-                Lihat arsip
-              </Link>
-            </Button>
-
-            <Button asChild>
-              <Link href="/applications/new">
-                <Plus aria-hidden="true" />
-                Tambah lamaran
-              </Link>
-            </Button>
-          </div>
+          <Button asChild variant="outline">
+            <Link href="/applications">
+              <ArrowLeft aria-hidden="true" />
+              Kembali ke lamaran aktif
+            </Link>
+          </Button>
         </section>
 
         <Card>
           <CardHeader>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <CardTitle>Cari dan filter lamaran</CardTitle>
+                <CardTitle>Cari arsip lamaran</CardTitle>
 
                 <CardDescription>
-                  Pencarian hanya dilakukan pada Job Application aktif milik akun Anda.
+                  Pencarian hanya dilakukan pada Job Application arsip milik akun Anda.
                 </CardDescription>
               </div>
 
@@ -138,21 +111,25 @@ export default async function ApplicationsPage({ searchParams }: ApplicationsPag
               filters={result.filters}
               errors={result.filterErrors}
               companyOptions={companyOptions}
-              actionPath="/applications"
+              actionPath="/applications/archived"
             />
           </CardContent>
         </Card>
 
         <section className="space-y-4">
           <div>
-            <h2 className="text-lg font-semibold">Lamaran aktif</h2>
+            <h2 className="text-lg font-semibold">Lamaran yang diarsipkan</h2>
 
             <p className="mt-1 text-sm text-muted-foreground">
-              Data ditampilkan berdasarkan pengurutan yang Anda pilih.
+              Memulihkan lamaran akan mengembalikannya ke daftar aktif.
             </p>
           </div>
 
-          <ApplicationList applications={result.applications} hasActiveFilters={hasActiveFilters} />
+          <ApplicationList
+            applications={result.applications}
+            hasActiveFilters={hasActiveFilters}
+            archived
+          />
         </section>
       </div>
     </main>

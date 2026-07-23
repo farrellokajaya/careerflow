@@ -17,6 +17,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+import {
+  archiveJobApplicationAction,
+  restoreJobApplicationAction,
+} from "@/actions/job-application-actions";
+import { ApplicationArchiveAction } from "@/components/applications/application-archive-action";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -129,6 +134,12 @@ function getPriorityVariant(priority: ApplicationPriority) {
 }
 
 export function ApplicationCard({ application }: ApplicationCardProps) {
+  const isArchived = application.archivedAt !== null;
+
+  const archiveAction = archiveJobApplicationAction.bind(null, application.id);
+
+  const restoreAction = restoreJobApplicationAction.bind(null, application.id);
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -138,12 +149,16 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
           </div>
 
           <div className="min-w-0 flex-1">
-            <CardTitle className="text-lg break-words">{application.position}</CardTitle>
+            <CardTitle className="text-lg [overflow-wrap:anywhere] break-words">
+              {application.position}
+            </CardTitle>
 
-            <CardDescription className="mt-1 flex min-w-0 items-center gap-1.5">
+            <CardDescription className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5">
               <Building2 className="size-4 shrink-0" aria-hidden="true" />
 
-              <span className="truncate">{application.company.name}</span>
+              <span className="min-w-0 [overflow-wrap:anywhere] break-words">
+                {application.company.name}
+              </span>
 
               {application.company.deletedAt ? (
                 <Badge variant="outline" className="shrink-0">
@@ -162,6 +177,8 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
           <Badge variant={getPriorityVariant(application.priority)}>
             {applicationPriorityLabels[application.priority]}
           </Badge>
+
+          {isArchived ? <Badge variant="secondary">Diarsipkan</Badge> : null}
         </div>
       </CardHeader>
 
@@ -176,7 +193,7 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
             <div className="min-w-0">
               <dt className="sr-only">Jenis pekerjaan dan sistem kerja</dt>
 
-              <dd className="break-words">
+              <dd className="[overflow-wrap:anywhere] break-words">
                 {employmentTypeLabels[application.employmentType]} /{" "}
                 {workTypeLabels[application.workType]}
               </dd>
@@ -189,7 +206,9 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
             <div className="min-w-0">
               <dt className="sr-only">Lokasi</dt>
 
-              <dd className="break-words">{application.location ?? "Lokasi belum tersedia"}</dd>
+              <dd className="[overflow-wrap:anywhere] break-words">
+                {application.location ?? "Lokasi belum tersedia"}
+              </dd>
             </div>
           </div>
 
@@ -199,7 +218,7 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
             <div className="min-w-0">
               <dt className="sr-only">Rentang gaji</dt>
 
-              <dd className="break-words">{formatSalary(application)}</dd>
+              <dd className="[overflow-wrap:anywhere] break-words">{formatSalary(application)}</dd>
             </div>
           </div>
 
@@ -243,23 +262,45 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
             <div className="min-w-0">
               <dt className="sr-only">Sumber lowongan</dt>
 
-              <dd className="break-words">{application.source ?? "Sumber belum tersedia"}</dd>
+              <dd className="[overflow-wrap:anywhere] break-words">
+                {application.source ?? "Sumber belum tersedia"}
+              </dd>
             </div>
           </div>
         </dl>
 
         <div className="mt-auto space-y-3 border-t pt-4">
           <p className="text-xs text-muted-foreground">
-            Diperbarui {dateFormatter.format(application.updatedAt)}
+            {application.archivedAt
+              ? `Diarsipkan ${dateFormatter.format(application.archivedAt)}`
+              : `Diperbarui ${dateFormatter.format(application.updatedAt)}`}
           </p>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            <Button asChild size="sm" className="w-full sm:w-fit">
-              <Link href={`/applications/${application.id}/edit`}>
-                <Pencil aria-hidden="true" />
-                Edit lamaran
-              </Link>
-            </Button>
+            {isArchived ? (
+              <ApplicationArchiveAction
+                action={restoreAction}
+                mode="restore"
+                position={application.position}
+                companyName={application.company.name}
+              />
+            ) : (
+              <>
+                <Button asChild size="sm" className="w-full sm:w-fit">
+                  <Link href={`/applications/${application.id}/edit`}>
+                    <Pencil aria-hidden="true" />
+                    Edit lamaran
+                  </Link>
+                </Button>
+
+                <ApplicationArchiveAction
+                  action={archiveAction}
+                  mode="archive"
+                  position={application.position}
+                  companyName={application.company.name}
+                />
+              </>
+            )}
 
             {application.jobUrl ? (
               <Button asChild size="sm" variant="outline" className="w-full sm:w-fit">

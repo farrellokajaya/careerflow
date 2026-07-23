@@ -26,6 +26,12 @@ const UPDATE_JOB_APPLICATION_ERROR_MESSAGE =
 const UPDATE_STATUS_ERROR_MESSAGE =
   "Status Job Application gagal diperbarui. Silakan coba kembali.";
 
+const ARCHIVE_JOB_APPLICATION_ERROR_MESSAGE =
+  "Job Application gagal diarsipkan. Silakan coba kembali.";
+
+const RESTORE_JOB_APPLICATION_ERROR_MESSAGE =
+  "Job Application gagal dipulihkan. Silakan coba kembali.";
+
 const STATUS_UPDATE_CONFLICT_MESSAGE =
   "Status tidak dapat diperbarui karena data telah berubah. Muat ulang halaman lalu coba kembali.";
 
@@ -204,6 +210,7 @@ export async function createJobApplicationAction(
   }
 
   revalidatePath("/applications");
+
   redirect("/applications?success=created");
 }
 
@@ -248,8 +255,9 @@ export async function updateJobApplicationAction(
   }
 
   /*
-   * Status aktual berasal dari database dan menimpa input client.
-   * Form edit umum tidak diperbolehkan mengubah status.
+   * Status aktual berasal dari database dan
+   * menimpa input client. Form edit umum tidak
+   * diperbolehkan mengubah status.
    */
   const parsedInput = jobApplicationFormSchema.safeParse({
     ...getJobApplicationFormInput(formData),
@@ -309,8 +317,9 @@ export async function updateJobApplicationAction(
       }
 
       /*
-       * Company lama boleh tetap dipakai walaupun telah diarsipkan.
-       * Jika company diganti, tujuan wajib aktif dan milik user.
+       * Company lama boleh tetap dipakai walaupun
+       * telah diarsipkan. Jika company diganti,
+       * tujuan wajib aktif dan milik user.
        */
       const selectedCompany = await transaction.company.findFirst({
         where: {
@@ -517,4 +526,124 @@ export async function updateJobApplicationStatusAction(
   revalidatePath(`/applications/${parsedApplicationId.data}/edit`);
 
   redirect("/applications?success=status-updated");
+}
+
+export async function archiveJobApplicationAction(
+  applicationId: string,
+  previousState: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  void previousState;
+  void formData;
+
+  const user = await requireAuthenticatedUser();
+
+  const parsedApplicationId = jobApplicationIdSchema.safeParse(applicationId);
+
+  if (!parsedApplicationId.success) {
+    return {
+      success: false,
+      message: JOB_APPLICATION_NOT_FOUND_MESSAGE,
+    };
+  }
+
+  let archivedApplicationCount: number;
+
+  try {
+    const result = await prisma.jobApplication.updateMany({
+      where: {
+        id: parsedApplicationId.data,
+        userId: user.id,
+        archivedAt: null,
+        company: {
+          userId: user.id,
+        },
+      },
+      data: {
+        archivedAt: new Date(),
+      },
+    });
+
+    archivedApplicationCount = result.count;
+  } catch {
+    return {
+      success: false,
+      message: ARCHIVE_JOB_APPLICATION_ERROR_MESSAGE,
+    };
+  }
+
+  if (archivedApplicationCount !== 1) {
+    return {
+      success: false,
+      message: JOB_APPLICATION_NOT_FOUND_MESSAGE,
+    };
+  }
+
+  revalidatePath("/applications");
+  revalidatePath("/applications/archived");
+  revalidatePath(`/applications/${parsedApplicationId.data}`);
+  revalidatePath(`/applications/${parsedApplicationId.data}/edit`);
+
+  redirect("/applications?success=archived");
+}
+
+export async function restoreJobApplicationAction(
+  applicationId: string,
+  previousState: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  void previousState;
+  void formData;
+
+  const user = await requireAuthenticatedUser();
+
+  const parsedApplicationId = jobApplicationIdSchema.safeParse(applicationId);
+
+  if (!parsedApplicationId.success) {
+    return {
+      success: false,
+      message: JOB_APPLICATION_NOT_FOUND_MESSAGE,
+    };
+  }
+
+  let restoredApplicationCount: number;
+
+  try {
+    const result = await prisma.jobApplication.updateMany({
+      where: {
+        id: parsedApplicationId.data,
+        userId: user.id,
+        archivedAt: {
+          not: null,
+        },
+        company: {
+          userId: user.id,
+        },
+      },
+      data: {
+        archivedAt: null,
+      },
+    });
+
+    restoredApplicationCount = result.count;
+  } catch {
+    return {
+      success: false,
+      message: RESTORE_JOB_APPLICATION_ERROR_MESSAGE,
+    };
+  }
+
+  if (restoredApplicationCount !== 1) {
+    return {
+      success: false,
+      message: JOB_APPLICATION_NOT_FOUND_MESSAGE,
+    };
+  }
+
+  revalidatePath("/applications");
+  revalidatePath("/applications/archived");
+  revalidatePath(`/applications/${parsedApplicationId.data}`);
+  revalidatePath(`/applications/${parsedApplicationId.data}/edit`);
+
+  redirect("/applications/archived?success=restored");
 }

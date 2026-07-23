@@ -16,6 +16,7 @@ type ApplicationFiltersProps = {
   filters: JobApplicationListFilters;
   errors: JobApplicationListFilterErrors;
   companyOptions: JobApplicationCompanyOption[];
+  actionPath?: string;
 };
 
 const applicationStatusLabels = {
@@ -57,7 +58,12 @@ function FilterError({ id, message }: { id: string; message?: string }) {
   );
 }
 
-export function ApplicationFilters({ filters, errors, companyOptions }: ApplicationFiltersProps) {
+export function ApplicationFilters({
+  filters,
+  errors,
+  companyOptions,
+  actionPath = "/applications",
+}: ApplicationFiltersProps) {
   const hasFilterErrors = Object.keys(errors).length > 0;
 
   const hasActiveFilters = Boolean(
@@ -79,7 +85,7 @@ export function ApplicationFilters({ filters, errors, companyOptions }: Applicat
         </div>
       ) : null}
 
-      <Form action="/applications" className="space-y-4">
+      <Form action={actionPath} className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="space-y-2 md:col-span-2 xl:col-span-1">
             <Label htmlFor="application-search">Pencarian</Label>
@@ -184,7 +190,7 @@ export function ApplicationFilters({ filters, errors, companyOptions }: Applicat
 
           {hasActiveFilters ? (
             <Button asChild variant="outline">
-              <Link href="/applications">
+              <Link href={actionPath}>
                 <RotateCcw aria-hidden="true" />
                 Reset
               </Link>
