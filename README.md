@@ -215,24 +215,24 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Available Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Starts the development server |
-| `npm run build` | Creates a production build |
-| `npm run start` | Starts the production server |
-| `npm run lint` | Runs ESLint |
-| `npm run lint:fix` | Fixes supported ESLint issues |
-| `npm run typecheck` | Checks TypeScript types |
-| `npm run format` | Formats project files with Prettier |
-| `npm run format:check` | Checks file formatting |
-| `npm run check` | Runs lint, type checking, formatting checks, and production build |
-| `npm run db:generate` | Generates the Prisma Client |
-| `npm run db:migrate` | Creates and applies development migrations |
-| `npm run db:migrate:deploy` | Applies existing migrations in production |
-| `npm run db:seed` | Populates the development database |
-| `npm run db:studio` | Opens Prisma Studio |
-| `npm run db:validate` | Validates the Prisma schema |
-| `npm run db:check` | Checks database connectivity and configuration |
+| Command                     | Description                                                       |
+| --------------------------- | ----------------------------------------------------------------- |
+| `npm run dev`               | Starts the development server                                     |
+| `npm run build`             | Creates a production build                                        |
+| `npm run start`             | Starts the production server                                      |
+| `npm run lint`              | Runs ESLint                                                       |
+| `npm run lint:fix`          | Fixes supported ESLint issues                                     |
+| `npm run typecheck`         | Checks TypeScript types                                           |
+| `npm run format`            | Formats project files with Prettier                               |
+| `npm run format:check`      | Checks file formatting                                            |
+| `npm run check`             | Runs lint, type checking, formatting checks, and production build |
+| `npm run db:generate`       | Generates the Prisma Client                                       |
+| `npm run db:migrate`        | Creates and applies development migrations                        |
+| `npm run db:migrate:deploy` | Applies existing migrations in production                         |
+| `npm run db:seed`           | Populates the development database                                |
+| `npm run db:studio`         | Opens Prisma Studio                                               |
+| `npm run db:validate`       | Validates the Prisma schema                                       |
+| `npm run db:check`          | Checks database connectivity and configuration                    |
 
 ## Quality Checks
 
