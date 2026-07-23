@@ -3,6 +3,7 @@ import type { Role } from "@/generated/prisma/enums";
 import { DashboardMobileNav } from "@/components/dashboard/dashboard-mobile-nav";
 import { DashboardUserMenu } from "@/components/dashboard/dashboard-user-menu";
 import { AppLogo } from "@/components/shared/app-logo";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 type DashboardHeaderProps = {
   user: {
@@ -28,7 +29,9 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
           <p className="text-xs text-muted-foreground">Kelola aktivitas pencarian kerja Anda</p>
         </div>
 
-        <div className="ml-auto min-w-0">
+        <div className="ml-auto flex min-w-0 items-center gap-2">
+          <ThemeToggle />
+
           <DashboardUserMenu user={user} />
         </div>
       </div>
