@@ -30,6 +30,14 @@ function getSuccessMessage(successCode: string | undefined): string | null {
     return "Job Application berhasil ditambahkan.";
   }
 
+  if (successCode === "updated") {
+    return "Job Application berhasil diperbarui.";
+  }
+
+  if (successCode === "status-updated") {
+    return "Status Job Application berhasil diperbarui.";
+  }
+
   return null;
 }
 
@@ -42,7 +50,6 @@ export default async function ApplicationsPage({ searchParams }: ApplicationsPag
   ]);
 
   const successCode = getFirstSearchParam(resolvedSearchParams.success);
-
   const successMessage = getSuccessMessage(successCode);
 
   const hasActiveFilters = Boolean(

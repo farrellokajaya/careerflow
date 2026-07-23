@@ -12,8 +12,10 @@ import {
   CalendarDays,
   ExternalLink,
   MapPin,
+  Pencil,
   Radio,
 } from "lucide-react";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -246,20 +248,31 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
           </div>
         </dl>
 
-        <div className="mt-auto flex flex-col gap-3 border-t pt-4">
+        <div className="mt-auto space-y-3 border-t pt-4">
           <p className="text-xs text-muted-foreground">
             Diperbarui {dateFormatter.format(application.updatedAt)}
           </p>
 
-          {application.jobUrl ? (
-            <Button asChild size="sm" variant="outline" className="w-full sm:w-fit">
-              <a href={application.jobUrl} target="_blank" rel="noreferrer">
-                <ExternalLink aria-hidden="true" />
-                Buka lowongan
-                <span className="sr-only"> untuk posisi {application.position} di tab baru</span>
-              </a>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <Button asChild size="sm" className="w-full sm:w-fit">
+              <Link href={`/applications/${application.id}/edit`}>
+                <Pencil aria-hidden="true" />
+                Edit lamaran
+              </Link>
             </Button>
-          ) : null}
+
+            {application.jobUrl ? (
+              <Button asChild size="sm" variant="outline" className="w-full sm:w-fit">
+                <a href={application.jobUrl} target="_blank" rel="noreferrer">
+                  <ExternalLink aria-hidden="true" />
+                  Buka lowongan
+                  <span className="sr-only">
+                    {` untuk posisi ${application.position} di tab baru`}
+                  </span>
+                </a>
+              </Button>
+            ) : null}
+          </div>
         </div>
       </CardContent>
     </Card>
